@@ -1,0 +1,15 @@
+
+# Dependências e arquivos temporários
+node_modules/
+.npm/
+*.log
+.DS_Store
+Thumbs.db
+
+# Configurações locais e segredos
+.env
+.env.*
+!.env.example
+
+# Arquivos de ferramentas locais
+.vscode/

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+        <link
+            rel="stylesheet"
+            href="../styles/css/base.css"
+        >
+
+        <link
+            rel="stylesheet"
+            href="../styles/css/nav-mod.css"
+        >
+
+        <link
+            rel="stylesheet"
+            href="../styles/css/dashboard.css"
+        >
+
+    <title>Taskly - Dashboard</title>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+
+
+    <!-- CONTEÚDO -->
+
+    <main class="dashboard">
+
+        <!-- SIDEBAR -->
+
+        <aside
+            class="dashboard-sidebar"
+            id="dashboardSidebar"
+        >
+
+            <div class="sidebar-header">
+
+                <h2>Dashboard</h2>
+
+                <button
+                    type="button"
+                    id="toggleSidebar"
+                    title="Diminuir menu"
+                >
+                    ←
+                </button>
+
+            </div>
+
+
+            <div class="sidebar-options">
+
+                <button
+                    type="button"
+                    class="sidebar-option active"
+                    data-section="routine"
+                >
+                    <span class="sidebar-icon">▦</span>
+
+                    <span class="sidebar-text">
+                        Rotina
+                    </span>
+                </button>
+
+
+                <button
+                    type="button"
+                    class="sidebar-option"
+                    data-section="completion"
+                >
+                    <span class="sidebar-icon">◔</span>
+
+                    <span class="sidebar-text">
+                        Conclusão de tarefas
+                    </span>
+                </button>
+
+
+                <button
+                    type="button"
+                    class="sidebar-option"
+                    data-section="workload"
+                >
+                    <span class="sidebar-icon">▤</span>
+
+                    <span class="sidebar-text">
+                        Carga de tarefas
+                    </span>
+                </button>
+
+            </div>
+
+
+        </aside>
+
+
+        <!-- ÁREA PRINCIPAL -->
+
+        <section class="dashboard-content">
+
+
+            <!-- ROTINA -->
+
+            <section
+                class="dashboard-section active"
+                id="routine"
+            >
+
+                <div class="section-title">
+
+                    <div>
+                        <h2>Minha rotina</h2>
+
+                        <p>
+                            Organize suas tarefas ao longo da semana.
+                        </p>
+                    </div>
+
+                    <button
+                        class="add-task-button"
+                        id="addTaskButton"
+                        type="button"
+                    >
+                        + Adicionar tarefa
+                    </button>
+
+                </div>
+
+
+                <!-- CONTROLE DA SEMANA -->
+
+                <div class="week-controls">
+
+                    <button
+                        type="button"
+                        id="previousWeek"
+                    >
+                        ←
+                    </button>
+
+
+                    <div>
+
+                        <strong id="weekTitle">
+                            Semana atual
+                        </strong>
+
+                        <span id="weekRange"></span>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="nextWeek"
+                    >
+                        →
+                    </button>
+
+                </div>
+
+
+                <!-- CALENDÁRIO -->
+
+                <div class="calendar">
+
+                    <div class="calendar-header">
+
+                        <div class="time-column">
+                            Horário
+                        </div>
+
+                        <div
+                            class="days-header"
+                            id="daysHeader"
+                        ></div>
+
+                    </div>
+
+
+                    <div
+                        class="calendar-body"
+                        id="calendarBody"
+                    ></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- CONCLUSÃO -->
+
+            <section
+                class="dashboard-section"
+                id="completion"
+            >
+
+                <div class="section-title">
+
+                    <div>
+                        <h2>Conclusão de tarefas</h2>
+
+                        <p>
+                            Veja quantas tarefas foram concluídas
+                            e quantas ainda estão pendentes.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="period-selector">
+
+                    <button
+                        type="button"
+                        class="period-button active"
+                        data-period="daily"
+                    >
+                        Dia
+                    </button>
+
+                    <button
+                        type="button"
+                        class="period-button"
+                        data-period="weekly"
+                    >
+                        Semana
+                    </button>
+
+                    <button
+                        type="button"
+                        class="period-button"
+                        data-period="monthly"
+                    >
+                        Mês
+                    </button>
+
+                </div>
+
+
+                <div class="completion-grid">
+
+                    <div class="chart-card">
+
+                        <h3 id="completionTitle">
+                            Hoje
+                        </h3>
+
+                        <div class="completion-summary">
+                            <strong id="completionPercent">
+                                0%
+                            </strong>
+                            <span>concluído</span>
+                        </div>
+
+                        <div
+                            class="pie-chart"
+                            id="completionPie"
+                            role="img"
+                            aria-label="0 tarefas concluídas e 0 pendentes"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="statistics-card">
+
+                        <div class="stat completed">
+
+                            <span class="stat-dot"></span>
+
+                            <div>
+                                <strong id="completedCount">
+                                    0
+                                </strong>
+
+                                <span>
+                                    Concluídas
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat pending">
+
+                            <span class="stat-dot"></span>
+
+                            <div>
+                                <strong id="pendingCount">
+                                    0
+                                </strong>
+
+                                <span>
+                                    Pendentes
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat total">
+
+                            <span class="stat-dot"></span>
+
+                            <div>
+                                <strong id="totalCount">
+                                    0
+                                </strong>
+
+                                <span>
+                                    Total
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- CARGA -->
+
+            <section
+                class="dashboard-section"
+                id="workload"
+            >
+
+                <div class="section-title">
+
+                    <div>
+                        <h2>Carga de tarefas</h2>
+
+                        <p>
+                            Veja como suas tarefas estão distribuídas.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="period-selector">
+
+                    <button
+                        type="button"
+                        class="workload-period active"
+                        data-workload="day"
+                    >
+                        Dia
+                    </button>
+
+                    <button
+                        type="button"
+                        class="workload-period"
+                        data-workload="week"
+                    >
+                        Semana
+                    </button>
+
+                    <button
+                        type="button"
+                        class="workload-period"
+                        data-workload="month"
+                    >
+                        Mês
+                    </button>
+
+                </div>
+
+
+                <div class="workload-card">
+
+                    <div
+                        class="workload-chart"
+                        id="workloadChart"
+                    ></div>
+
+                    <div
+                        class="workload-legend"
+                        aria-label="Intensidade da carga"
+                    >
+                        <span>
+                            <i class="workload-swatch workload-low"></i>
+                            Baixa / nenhuma
+                        </span>
+                        <span>
+                            <i class="workload-swatch workload-medium"></i>
+                            Média
+                        </span>
+                        <span>
+                            <i class="workload-swatch workload-high"></i>
+                            Pico
+                        </span>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+
+    <!-- MODAL DE TAREFA -->
+
+    <div
+        class="modal-overlay"
+        id="taskModal"
+    >
+
+        <div class="task-modal">
+
+            <button
+                class="fechar-modal"
+                id="closeTaskModal"
+            >
+                &times;
+            </button>
+
+
+            <h2>Nova tarefa</h2>
+
+
+            <label>
+                Nome da tarefa
+            </label>
+
+            <input
+                type="text"
+                id="taskName"
+                placeholder="Ex.: Estudar"
+            >
+
+
+            <label>
+                Data
+            </label>
+
+            <input
+                type="date"
+                id="taskDate"
+            >
+
+
+            <label>
+                Horário
+            </label>
+
+            <input
+                type="time"
+                id="taskTime"
+                value="08:00"
+            >
+
+
+            <button
+                type="button"
+                class="save-task"
+                id="saveTask"
+            >
+                Adicionar tarefa
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script src="../scripts/nav-mod.js"></script>
+    <script type="module" src="../scripts/auth-guard.js"></script>
+
+    <script type="module" src="../scripts/dashboard.js"></script>
+
+</body>
+
+</html>

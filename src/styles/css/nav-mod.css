@@ -1,0 +1,676 @@
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+nav {
+    width: 100%;
+    height: 70px;
+
+    padding: 40px 40px 40px 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    position: relative;
+}
+
+nav::after {
+    content: "";
+
+    position: absolute;
+
+    bottom: 0;
+    left: 25px;
+
+    width: calc(100% - 50px);
+    height: 4px;
+
+    border-radius: 25px;
+
+    background-color: var(--blue);
+}
+
+
+/* =========================================================
+   LOGO + LINKS
+========================================================= */
+
+.logo-links {
+    display: flex;
+    align-items: center;
+
+    gap: 150px;
+}
+
+.logo-links h1 {
+    font-size: 40px;
+    color: var(--text);
+}
+
+
+/* =========================================================
+   LINKS DA NAVBAR
+========================================================= */
+
+.links {
+    display: flex;
+    align-items: center;
+    gap: 110px;
+}
+
+.links a {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 1;
+
+    text-decoration: none;
+
+    color: var(--text);
+
+    font-size: 18px;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+
+/* Fundo da página selecionada */
+
+.links a::before {
+    content: "";
+
+    position: absolute;
+
+    width: 190px;
+    height: 60px;
+
+    top: -27px;
+
+
+    background-color: var(--tab-active);
+
+    border-radius: 0 0 70px 70px;
+
+    opacity: 0;
+
+    z-index: -1;
+    transition: opacity 0.2s ease;
+}
+
+.links a.active::before {
+    opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+
+    .menu-button:hover,
+    .menu-button:focus-visible {
+        background-color: var(--yellow);
+        color: var(--dark);
+    }
+
+}
+
+
+/* =========================================================
+   PERFIL NA NAVBAR
+========================================================= */
+
+.account {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-right: 20px;
+
+    cursor: pointer;
+}
+
+.account p {
+    color: var(--text);
+
+    font-size: 16px;
+}
+
+
+/* Foto/avatar */
+
+.user {
+    width: 45px;
+    height: 45px;
+
+    border-radius: 50%;
+
+    background-color: var(--blue);
+}
+
+
+/* =========================================================
+   BOTÃO MENU MOBILE
+========================================================= */
+
+.menu-button {
+    display: none;
+
+    position: relative;
+
+    width: 42px;
+    height: 42px;
+
+    border: none;
+    border-radius: 10px;
+
+    background-color: var(--action-bg);
+    color: var(--action-text);
+
+    font-size: 22px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+
+/* =========================================================
+   MODAL PERFIL / CONFIGURAÇÕES
+========================================================= */
+
+.modal-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px;
+
+    background-color: var(--overlay);
+
+    z-index: 1000;
+}
+
+.modal-overlay.ativo {
+    display: flex;
+}
+
+
+/* Caixa do modal */
+
+.modal {
+    width: min(800px, 100%);
+
+    height: 500px;
+
+    position: relative;
+
+    display: flex;
+
+    background-color: var(--surface);
+
+    border-radius: 25px;
+
+    overflow: hidden;
+
+    transition:
+        background-color 0.3s ease;
+}
+
+
+/* =========================================================
+   MENU LATERAL DO MODAL
+========================================================= */
+
+.mod-side-bar {
+    width: 205px;
+    height: 100%;
+
+    padding: 135px 0 0 40px;
+
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 60px;
+
+    flex-shrink: 0;
+}
+
+
+/* Linha lateral */
+
+.mod-side-bar::after {
+    content: "";
+
+    position: absolute;
+
+    top: 68px;
+    right: 0;
+
+    width: 5px;
+    height: 330px;
+
+    border-radius: 25px;
+
+    background-color: var(--blue);
+}
+
+
+/* Opções */
+
+.mod-side-bar a {
+    width: max-content;
+
+    position: relative;
+
+    z-index: 1;
+
+    color: var(--text);
+
+    text-decoration: none;
+
+    font-size: 18px;
+    font-weight: 600;
+}
+
+
+/* Fundo da opção selecionada */
+
+.mod-side-bar a::before {
+    content: "";
+
+    position: absolute;
+
+    width: 65px;
+    height: 58px;
+
+    top: -15px;
+    left: -40px;
+
+    background-color: var(--tab-active);
+
+    border-radius: 0 70px 70px 0;
+
+    opacity: 0;
+
+    z-index: -1;
+}
+
+.mod-side-bar a.active::before {
+    opacity: 1;
+}
+
+
+/* =========================================================
+   CONTEÚDO DO MODAL
+========================================================= */
+
+.info {
+    flex: 1;
+
+    padding: 80px 50px 40px;
+
+    color: var(--text);
+
+    overflow-y: auto;
+}
+
+
+/* =========================================================
+   BOTÃO FECHAR
+========================================================= */
+
+.fechar-modal {
+    position: absolute;
+
+    top: 15px;
+    right: 25px;
+
+    z-index: 5;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-size: 40px;
+    line-height: 1;
+    font-weight: 300;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   PERFIL
+========================================================= */
+
+.profile-content,
+.settings-content {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+.profile-content h2,
+.settings-content h2 {
+    color: var(--text);
+
+    font-size: 28px;
+}
+
+.profile-user {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+}
+
+.profile-user .user {
+    width: 60px;
+    height: 60px;
+}
+
+.profile-content p,
+.profile-content strong,
+.settings-content span {
+    color: var(--text);
+}
+
+.logout-button {
+    width: fit-content;
+    margin-top: 8px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 12px;
+    background-color: var(--blue);
+    color: var(--light);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   CONFIGURAÇÕES
+========================================================= */
+
+.setting {
+    width: 100%;
+
+    max-width: 450px;
+
+    padding: 18px 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    border-bottom: 1px solid var(--border);
+}
+
+
+/* =========================================================
+   SWITCH
+========================================================= */
+
+.switch {
+    width: 52px;
+    height: 28px;
+
+    position: relative;
+
+    display: inline-block;
+}
+
+.switch input {
+    opacity: 0;
+
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+
+    inset: 0;
+
+    border-radius: 30px;
+
+    background-color: #777;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.slider::before {
+    content: "";
+
+    width: 20px;
+    height: 20px;
+
+    position: absolute;
+
+    left: 4px;
+    bottom: 4px;
+
+    border-radius: 50%;
+
+    background-color: var(--light);
+
+    transition: 0.3s;
+}
+
+.switch input:checked + .slider {
+    background-color: var(--blue);
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(24px);
+}
+
+
+/* =========================================================
+   RESPONSIVO
+========================================================= */
+
+@media (max-width: 950px) {
+
+    .logo-links {
+        gap: 70px;
+    }
+
+    .links {
+        gap: 60px;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    nav {
+        height: 80px;
+        padding: 20px;
+    }
+
+    nav::after {
+        left: 15px;
+        width: calc(100% - 30px);
+    }
+
+    .logo-links {
+        width: auto;
+        flex: 1;
+        justify-content: flex-start;
+        gap: 15px;
+    }
+    
+    .logo-links h1 {
+        font-size: 32px;
+    }
+
+    .menu-button {
+        display: block;
+    }
+
+    .menu-button.menu-open {
+        background-color: var(--action-bg);
+        color: var(--action-text);
+    }
+
+    .menu-button.menu-open::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        width: 24px;
+        height: 40px;
+        transform: translateX(-50%);
+        border-radius: 0 0 6px 6px;
+        background-color: var(--action-bg);
+        z-index: 101;
+    }
+
+    .account {
+        margin-right: 0;
+        margin-left: 15px;
+    }
+
+
+    /* Menu fechado */
+
+    .links {
+        display: none;
+
+        position: absolute;
+
+        top: 80px;
+        left: 0;
+
+        width: 100%;
+
+        padding: 25px;
+
+        flex-direction: column;
+
+        gap: 25px;
+
+        background-color: var(--action-bg);
+        color: var(--action-text);
+
+        z-index: 100;
+
+        border-bottom: 3px solid var(--blue);
+    }
+
+    .links a.active {
+        background-color: var(--tab-active);
+        padding: 0px 15px 0px 15px;
+        border-radius: 25px;
+        color: var(--dark);
+    }
+
+    .links a:not(.active) {
+        color: var(--action-text);
+    }
+
+    /* Menu aberto */
+
+    .links.menu-open {
+        display: flex;
+    }
+
+
+    /* No mobile não usamos a bolha */
+
+    .links a::before {
+        display: none;
+    }
+
+
+    .account p {
+        display: none;
+    }
+
+
+    /* =====================================================
+       MODAL NO CELULAR
+    ===================================================== */
+
+    .modal {
+        height: min(90vh, 600px);
+        max-height: calc(100vh - 20px);
+
+        flex-direction: column;
+    }
+
+    .mod-side-bar {
+        width: 100%;
+        height: 105px;
+        flex: 0 0 105px;
+
+        padding: 45px 25px 0;
+
+        flex-direction: row;
+
+        gap: 45px;
+
+        overflow: hidden;
+    }
+
+    .mod-side-bar::after {
+        top: auto;
+        right: auto;
+
+        bottom: 0;
+        left: 25px;
+
+        width: calc(100% - 50px);
+
+        height: 4px;
+    }
+
+    .mod-side-bar a::before {
+        width: calc(100% + 30px);
+        height: 45px;
+
+        top: -10px;
+        left: -15px;
+
+        border-radius: 25px;
+    }
+
+    .info {
+        padding: 35px 25px;
+    }
+
+}
+
+
+@media (max-width: 400px) {
+
+    .mod-side-bar {
+        gap: 25px;
+
+        padding-left: 20px;
+    }
+
+    .mod-side-bar a {
+        font-size: 16px;
+    }
+
+}

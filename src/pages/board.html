@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="../styles/css/base.css">
+    <link rel="stylesheet" href="../styles/css/board.css">
+    <link rel="stylesheet" href="../styles/css/nav-mod.css">
+
+    <title>Taskly</title>
+</head>
+
+<body>
+
+    <main>
+
+        <div class="board-header">
+
+            <div class="project-name">
+
+                <input
+                    type="text"
+                    id="projectName"
+                    value=""
+                    aria-label="Nome do projeto"
+                >
+
+            </div>
+
+            <button
+                style=" width: 280px;"
+                class="action-button"
+                id="abrirProjetos"
+            >
+                Ver todos projetos
+
+                <img
+                    src="../styles/img/arrow-wh.png"
+                    alt=""
+                >
+
+            </button>
+
+        </div>
+
+
+        <div class="board">
+
+            <button
+                class="add-card"
+                id="addProject"
+                aria-label="Adicionar quadro"
+            >
+                <span>+</span>
+            </button>
+
+        </div>
+
+    </main>
+
+
+    <!-- MODAL DOS PROJETOS -->
+
+    <div
+        class="modal-overlay"
+        id="modalProjetos"
+    >
+
+        <div class="projects-modal">
+
+            <button
+                class="fechar-modal"
+                id="fecharProjetos"
+            >
+                &times;
+            </button>
+
+            <h2>Meus projetos</h2>
+
+            <div
+                class="projects-list"
+                id="projectsList"
+            >
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="../scripts/nav-mod.js"></script>
+    <script type="module" src="../scripts/auth-guard.js"></script>
+    <script type="module" src="../scripts/board.js"></script>
+
+</body>
+
+</html>

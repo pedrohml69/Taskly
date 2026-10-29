@@ -1,0 +1,31 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <link rel="stylesheet" href="../styles/css/base.css">
+        <link rel="stylesheet" href="../styles/css/login.css"> 
+        <title>Document</title>
+    </head>
+    <body>
+        <main>
+            <div class="squares">
+            </div>
+            <div class="form-part">
+                <a href="../index.html"><button class="back-button"><img src="../styles/img/arrow-wh.png" alt=""></button></a>
+                <form action="" novalidate>
+                    <h1>Cadastrar</h1>
+                    <input type="text" placeholder="Nome" name="name" id="name" autocomplete="name" required>
+                    <input type="email" placeholder="Email" name="email" id="email" autocomplete="email" required>
+                    <input type="password" placeholder="Senha" name="password" id="password" autocomplete="new-password" required>
+                    <input type="password" placeholder="Confirmar Senha" name="confirmPassword" id="confirmPassword" autocomplete="new-password" required>
+                    <button type="submit">Cadastrar</button>
+                </form>
+                <p style="text-align: center; width: 100%;">Já tem uma conta? <a href="../pages/login.html">Entrar</a></p>
+            </div>
+        </main>
+
+        <script type="module" src="../scripts/auth-guard.js"></script>
+        <script type="module" src="../scripts/register.js"></script>
+    </body>
+    </html>

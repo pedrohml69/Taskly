@@ -1,0 +1,194 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    --blue: #889CFF;
+    --yellow: #F9DD89;
+    --red: #FF8989;
+
+    --dark: #1E1E1E;
+    --light: #FFFFFF;
+
+    --background: #FFFFFF;
+    --surface: #FFFFFF;
+
+    --text: #1E1E1E;
+    --muted: #666666;
+    --border: #DDDDDD;
+
+    --overlay: rgba(30, 30, 30, 0.45);
+
+    /* Dashboard */
+    --sidebar: #C6C6C6;
+    --sidebar-text: #1E1E1E;
+    --sidebar-active: #F9DD89;
+    --sidebar-button: #AAAAAA;
+    --sidebar-hover: rgba(255, 255, 255, 0.25);
+    --sidebar-resize: #999999;
+
+    --calendar-hover: rgba(136, 156, 255, 0.08);
+
+    /* Seleção */
+    --tab-active: #F9DD89;
+
+    /* Botões */
+    --action-bg: #1E1E1E;
+    --action-text: #FFFFFF;
+
+    /* setas */
+    --arrow-bg: url("../img/arrow-wh.png");
+}
+
+
+body.dark-mode {
+
+    --background: #151515;
+    --surface: #202020;
+
+    --text: #FFFFFF;
+    --muted: #BBBBBB;
+    --border: #444444;
+
+    --overlay: rgba(0, 0, 0, 0.7);
+
+    /* Dashboard no modo escuro */
+
+    --sidebar: #292929;
+    --sidebar-text: #FFFFFF;
+    --sidebar-active: #889CFF;
+    --sidebar-button: #444444;
+    --sidebar-hover: rgba(255, 255, 255, 0.08);
+    --sidebar-resize: #666666;
+
+    --calendar-hover: rgba(136, 156, 255, 0.08);
+
+    /* Seleção fica azul */
+
+    --tab-active: #889CFF;
+
+    /* Botão muda de cor */
+
+    --action-bg: #FFFFFF;
+    --action-text: #1E1E1E;
+
+    /* setas */
+    --arrow-bg: url("../img/arrow-bl.png");
+}
+
+body.dark-mode {
+    --background: #151515;
+    --surface: #202020;
+    --text: #FFFFFF;
+    --muted: #BBBBBB;
+    --border: #444444;
+    --overlay: rgba(0, 0, 0, 0.7);
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button,
+input {
+    font-family: inherit;
+}
+
+a {
+    color: inherit;
+}
+
+nav {
+    width: 100%;
+    height: 100px;
+    padding: 30px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+}
+
+nav::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 25px;
+    width: calc(100% - 50px);
+    height: 4px;
+    border-radius: 25px;
+    background-color: var(--blue);
+}
+
+.logo h1,
+.logo-links h1 {
+    font-size: 40px;
+    color: var(--text);
+}
+
+.action-button {
+    min-height: 55px;
+    padding: 0 10px 0 25px;
+    border-radius: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+
+    background-color: var(--action-bg);
+    color: var(--action-text);
+
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+.action-button img {
+    width: 60px;
+    height: 55px;
+    object-fit: contain;
+    content: var(--arrow-bg);
+}
+
+.action-button:hover {
+    background-color: var(--yellow);
+    color: var(--dark);
+}
+
+.action-button:hover img {
+    content: url("../img/arrow-bl.png") ;
+}
+
+@media (max-width: 700px) {
+    nav {
+        height: 80px;
+        padding: 20px;
+    }
+
+    nav::after {
+        left: 15px;
+        width: calc(100% - 30px);
+    }
+
+    .logo h1,
+    .logo-links h1 {
+        font-size: 32px;
+    }
+}
