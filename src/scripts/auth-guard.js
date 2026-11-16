@@ -1,124 +1,99 @@
 import {
-    onAuthStateChanged,
-    signOut
+	getIdToken,
+	onAuthStateChanged,
+	reload,
+	signOut
 } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 
 import {
-    doc,
-    getDoc
+	doc,
+	getDoc
 } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
-import {
-    auth,
-    db
-} from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 
+const privatePages = new Set(["dashboard.html", "board.html"]);
 const currentPage = window.location.pathname.split("/").pop();
 
-function getPageUrl(pageName) {
-    const isInsidePagesFolder = window.location.pathname.includes("/pages/");
+window.currentUserProfile = {
+	name: "Usuário",
+	email: ""
+};
 
-    return isInsidePagesFolder
-        ? `./${pageName}`
-        : `./pages/${pageName}`;
-}
+async function loadCurrentUserProfile(user) {
+	let profile = {
+		name: user.displayName || "Usuário",
+		email: user.email || ""
+	};
 
-function setCurrentUserProfile(profileData) {
-    const safeProfile = profileData || {
-        name: "Usuário",
-        email: ""
-    };
+	try {
+		const profileSnapshot = await getDoc(
+			doc(db, "users", user.uid, "profile", "main")
+		);
 
-    window.currentUserProfile = {
-        name: safeProfile.name || "Usuário",
-        email: safeProfile.email || ""
-    };
+		if (profileSnapshot.exists()) {
+			const profileData = profileSnapshot.data();
+			profile = {
+				name: profileData.name || profile.name,
+				email: profileData.email || profile.email
+			};
+		}
+	} catch (error) {
+		console.error("Não foi possível carregar o perfil do usuário:", error);
+	}
 
-    const accountName = document.querySelector(".account p");
+	window.currentUserProfile = profile;
 
-    if (accountName) {
-        accountName.textContent = window.currentUserProfile.name;
-    }
-
-    if (typeof window.applyUserProfile === "function") {
-        window.applyUserProfile(window.currentUserProfile);
-    }
-}
-
-async function resolveUserProfile(user) {
-    if (!user) {
-        return {
-            name: "Usuário",
-            email: ""
-        };
-    }
-
-    try {
-        const profileRef = doc(
-            db,
-            "users",
-            user.uid,
-            "profile",
-            "main"
-        );
-
-        const profileSnapshot = await getDoc(profileRef);
-
-        if (profileSnapshot.exists()) {
-            const profileData = profileSnapshot.data();
-
-            return {
-                name: profileData.name || user.displayName || "Usuário",
-                email: profileData.email || user.email || ""
-            };
-        }
-    } catch (error) {
-        console.warn("Não foi possível carregar o perfil do usuário.", error);
-    }
-
-    return {
-        name: user.displayName || "Usuário",
-        email: user.email || ""
-    };
+	if (typeof window.applyUserProfile === "function") {
+		window.applyUserProfile(profile);
+	}
 }
 
 window.logoutCurrentUser = async function () {
-    try {
-        await signOut(auth);
-        window.location.href = getPageUrl("login.html");
-    } catch (error) {
-        console.error("Erro ao fazer logout.", error);
-        alert("Não foi possível sair da conta no momento.");
-    }
+	try {
+		await signOut(auth);
+		window.location.replace("./login.html");
+	} catch (error) {
+		console.error("Não foi possível encerrar a sessão:", error);
+		alert("Não foi possível sair da conta. Tente novamente.");
+	}
 };
 
-onAuthStateChanged(auth, async (user) => {
-    const protectedPages = ["dashboard.html", "board.html"];
-    const authPages = ["login.html", "register.html"];
+if (privatePages.has(currentPage)) {
+	onAuthStateChanged(auth, async (user) => {
+		if (!user) {
+			window.location.replace("./login.html");
+			return;
+		}
 
-    if (protectedPages.includes(currentPage) && !user) {
-        window.location.href = getPageUrl("login.html");
-        return;
-    }
+		const wasVerified = user.emailVerified;
 
-    if (authPages.includes(currentPage) && user) {
-        window.location.href = getPageUrl("dashboard.html");
-        return;
-    }
+		try {
+			await reload(user);
+		} catch (error) {
+			console.error("Não foi possível confirmar a sessão:", error);
+			window.location.replace("./verify-email.html?refresh=failed");
+			return;
+		}
 
-    if (currentPage === "index.html" && user) {
-        window.location.href = getPageUrl("dashboard.html");
-        return;
-    }
+		if (!user.emailVerified) {
+			window.location.replace("./verify-email.html");
+			return;
+		}
 
-    if (user) {
-        const profile = await resolveUserProfile(user);
-        setCurrentUserProfile(profile);
-        return;
-    }
+		if (!wasVerified) {
+			try {
+				await getIdToken(user, true);
+			} catch (error) {
+				console.error("Não foi possível atualizar o token da sessão:", error);
+				window.location.replace("./verify-email.html?refresh=failed");
+				return;
+			}
 
-    setCurrentUserProfile({
-        name: "Usuário",
-        email: ""
-    });
-});
+			window.location.reload();
+			return;
+		}
+
+		await loadCurrentUserProfile(user);
+	});
+}
