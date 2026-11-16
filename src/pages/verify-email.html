@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/css/base.css">
+    <link rel="stylesheet" href="../styles/css/login.css">
+    <title>Verifique seu e-mail - Taskly</title>
+</head>
+<body>
+    <main>
+        <div class="squares"></div>
+        <section class="form-part" aria-labelledby="pageTitle">
+            <h1 id="pageTitle">Verifique seu e-mail</h1>
+            <p id="emailAddress" aria-live="polite"></p>
+            <p id="verificationStatus" role="status" aria-live="polite">
+                Estamos verificando o estado da sua conta.
+            </p>
+            <button type="button" id="checkVerification" class="link-button">
+                Já verifiquei meu e-mail
+            </button>
+            <button type="button" id="resendVerification" class="link-button">
+                Reenviar e-mail de verificação
+            </button>
+            <a id="continueLink" href="./login.html">Voltar ao login</a>
+        </section>
+    </main>
+    <script type="module" src="../scripts/verify-email.js"></script>
+</body>
+</html>

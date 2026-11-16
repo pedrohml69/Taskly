@@ -41,14 +41,12 @@ function criarNavbar() {
                 class="menu-button"
                 id="menuButton"
                 type="button"
-                aria-controls="navigationLinks"
-                aria-expanded="false"
             >
                 ☰
             </button>
 
 
-            <div class="links" id="navigationLinks">
+            <div class="links">
 
                 <a
                     href="../pages/dashboard.html"
@@ -77,7 +75,7 @@ function criarNavbar() {
 
             <div class="user"></div>
 
-            <p>
+            <p data-profile-name>
                 Usuário
             </p>
 
@@ -89,32 +87,6 @@ function criarNavbar() {
     document.body.prepend(navbar);
 
 }
-
-window.applyUserProfile = function (profile) {
-
-    const userProfile = profile || window.currentUserProfile || {
-        name: "Usuário",
-        email: ""
-    };
-
-    const accountName = document.querySelector(".account p");
-
-    if (accountName) {
-        accountName.textContent = userProfile.name || "Usuário";
-    }
-
-    const profileName = document.querySelector(".profile-content strong");
-    const profileEmail = document.querySelector(".profile-content p");
-
-    if (profileName) {
-        profileName.textContent = userProfile.name || "Usuário";
-    }
-
-    if (profileEmail) {
-        profileEmail.textContent = userProfile.email || "";
-    }
-
-};
 
 
 /* =========================================================
@@ -182,6 +154,33 @@ function criarModalPerfil() {
     document.body.appendChild(modal);
 
 }
+
+window.currentUserProfile = {
+    name: "Usuário",
+    email: ""
+};
+
+window.applyUserProfile = function (profile) {
+    const name =
+        typeof profile?.name === "string" && profile.name.trim()
+            ? profile.name.trim()
+            : "Usuário";
+
+    const email =
+        typeof profile?.email === "string"
+            ? profile.email
+            : "";
+
+    window.currentUserProfile = { name, email };
+
+    document.querySelectorAll("[data-profile-name]").forEach((element) => {
+        element.textContent = name;
+    });
+
+    document.querySelectorAll("[data-profile-email]").forEach((element) => {
+        element.textContent = email;
+    });
+};
 
 
 /* =========================================================
@@ -255,11 +254,6 @@ function mostrarPerfil() {
     );
 
 
-    const currentProfile = window.currentUserProfile || {
-        name: "Usuário",
-        email: ""
-    };
-
     info.innerHTML = `
 
         <div class="profile-content">
@@ -276,13 +270,11 @@ function mostrarPerfil() {
 
                 <div>
 
-                    <strong>
-                        ${currentProfile.name || "Usuário"}
+                    <strong data-profile-name>
+                        Usuário
                     </strong>
 
-                    <p>
-                        ${currentProfile.email || ""}
-                    </p>
+                    <p data-profile-email></p>
 
                 </div>
 
@@ -290,17 +282,19 @@ function mostrarPerfil() {
 
 
             <p>
-                Nome: ${currentProfile.name || "Usuário"}
+                Nome: <span data-profile-name>Usuário</span>
             </p>
 
 
             <p>
-                Email: ${currentProfile.email || ""}
+                Email: <span data-profile-email></span>
             </p>
 
         </div>
 
     `;
+
+    window.applyUserProfile(window.currentUserProfile);
 
 }
 
@@ -376,40 +370,37 @@ function mostrarConfiguracoes() {
             </div>
 
 
-            <button
-                type="button"
-                class="logout-button"
-                id="logoutButton"
-            >
-                Sair da conta
-            </button>
+            <div class="setting">
+
+                <span>
+                    Notificações
+                </span>
+
+
+                <label class="switch">
+
+                    <input
+                        type="checkbox"
+                        checked
+                    >
+
+                    <span class="slider"></span>
+
+                </label>
+
+            </div>
 
         </div>
 
     `;
 
 
-    const modoNoturnoInput = document.getElementById("modoNoturno");
-
-    if (modoNoturnoInput) {
-        modoNoturnoInput.addEventListener(
+    document
+        .getElementById("modoNoturno")
+        .addEventListener(
             "change",
             alterarModoNoturno
         );
-    }
-
-    const logoutButton = document.getElementById("logoutButton");
-
-    if (logoutButton) {
-        logoutButton.addEventListener(
-            "click",
-            () => {
-                if (typeof window.logoutCurrentUser === "function") {
-                    window.logoutCurrentUser();
-                }
-            }
-        );
-    }
 
 }
 
@@ -470,17 +461,8 @@ function configurarMenuMobile() {
         "click",
         () => {
 
-            const menuAberto =
-                links.classList.toggle("menu-open");
-
-            menuButton.classList.toggle(
-                "menu-open",
-                menuAberto
-            );
-
-            menuButton.setAttribute(
-                "aria-expanded",
-                String(menuAberto)
+            links.classList.toggle(
+                "menu-open"
             );
 
         }
