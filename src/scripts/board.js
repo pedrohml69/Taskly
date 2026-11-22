@@ -7,9 +7,11 @@ import {
     collection,
     deleteDoc,
     doc,
+    getDoc,
     getDocs,
     runTransaction,
-    updateDoc
+    updateDoc,
+    setDoc
 } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
 import {
@@ -47,6 +49,19 @@ const coresQuadros = [
     "quadro-amarelo",
     "quadro-vermelho"
 ];
+
+const colunasFixas = [
+    { id: "kanban-fazer", nome: "To Do", ordem: 0, cor: "quadro-azul" },
+    { id: "kanban-fazendo", nome: "Doing", ordem: 1, cor: "quadro-amarelo" },
+    { id: "kanban-feito", nome: "Done", ordem: 2, cor: "quadro-vermelho" }
+];
+
+const colunaRevisar = {
+    id: "kanban-revisar",
+    nome: "Review",
+    ordem: 3,
+    cor: "quadro-amarelo"
+};
 
 const projetoPadrao = {
     id: "project-001",
@@ -405,6 +420,38 @@ async function criarProjeto() {
     }
 }
 
+async function garantirColunasFixas(usuario, projeto) {
+    await runTransaction(db, async (transacao) => {
+        const referencias = colunasFixas.map((coluna) =>
+            doc(
+                db,
+                "users",
+                usuario.uid,
+                "projects",
+                projeto.id,
+                "boards",
+                coluna.id
+            )
+        );
+        const snapshots = await Promise.all(
+            referencias.map((referencia) => transacao.get(referencia))
+        );
+
+        snapshots.forEach((snapshot, indice) => {
+            const coluna = colunasFixas[indice];
+
+            if (!snapshot.exists()) {
+                transacao.set(referencias[indice], {
+                    nome: coluna.nome,
+                    ordem: coluna.ordem,
+                    cor: coluna.cor,
+                    itens: []
+                });
+            }
+        });
+    });
+}
+
 async function carregarQuadros(projeto) {
     const usuario = usuarioAtual;
     const geracaoAtual = ++geracaoDeQuadros;
@@ -417,7 +464,7 @@ async function carregarQuadros(projeto) {
     }
 
     try {
-        const snapshot = await getDocs(quadrosRef(usuario.uid, projeto.id));
+        await garantirColunasFixas(usuario, projeto);
 
         if (
             geracaoAtual !== geracaoDeQuadros ||
@@ -427,12 +474,56 @@ async function carregarQuadros(projeto) {
             return;
         }
 
-        quadros = snapshot.docs
-            .map((quadroDoc) => ({
-                id: quadroDoc.id,
-                ...quadroDoc.data()
-            }))
-            .sort((primeiro, segundo) => primeiro.ordem - segundo.ordem);
+        const referencias = [
+            ...colunasFixas,
+            colunaRevisar
+        ].map((coluna) =>
+            doc(
+                db,
+                "users",
+                usuario.uid,
+                "projects",
+                projeto.id,
+                "boards",
+                coluna.id
+            )
+        );
+        const snapshots = await Promise.all(
+            referencias.map((referencia) => getDoc(referencia))
+        );
+
+        if (
+            geracaoAtual !== geracaoDeQuadros ||
+            usuarioAtual?.uid !== usuario.uid ||
+            projetoAtual?.id !== projeto.id
+        ) {
+            return;
+        }
+
+        quadros = snapshots
+            .map((snapshot, indice) => {
+                const configuracao = [
+                    ...colunasFixas,
+                    colunaRevisar
+                ][indice];
+
+                if (!snapshot.exists()) {
+                    return null;
+                }
+
+                const dados = snapshot.data();
+
+                return {
+                    id: snapshot.id,
+                    nome: configuracao.nome,
+                    ordem: configuracao.ordem,
+                    cor: configuracao.cor,
+                    itens: Array.isArray(dados.itens)
+                        ? dados.itens
+                        : []
+                };
+            })
+            .filter((quadro) => quadro !== null);
 
         renderizarQuadros();
     } catch (error) {
@@ -450,6 +541,12 @@ function renderizarQuadros() {
     quadros.forEach((dadosQuadro) => {
         addProject.before(criarElementoQuadro(dadosQuadro));
     });
+
+    const revisarExiste = quadros.some(
+        (quadro) => quadro.id === colunaRevisar.id
+    );
+    addProject.hidden = revisarExiste;
+    addProject.style.display = revisarExiste ? "none" : "";
 }
 
 function criarElementoQuadro(dadosQuadro) {
@@ -458,6 +555,10 @@ function criarElementoQuadro(dadosQuadro) {
     const listaItens = document.createElement("div");
     const adicionarItem = document.createElement("button");
     const excluirQuadro = document.createElement("button");
+    const colunaFixa = colunasFixas.some(
+        (coluna) => coluna.id === dadosQuadro.id
+    );
+    const colunaRevisarAtual = dadosQuadro.id === colunaRevisar.id;
 
     cartao.classList.add("board-card");
     cartao.dataset.boardId = dadosQuadro.id;
@@ -471,6 +572,9 @@ function criarElementoQuadro(dadosQuadro) {
     titulo.type = "text";
     titulo.value = dadosQuadro.nome;
     titulo.setAttribute("aria-label", "Nome do quadro");
+    if (colunaFixa || colunaRevisarAtual) {
+        titulo.readOnly = true;
+    }
 
     listaItens.classList.add("board-items");
     listaItens.addEventListener("dragover", (event) => {
@@ -534,22 +638,17 @@ function criarElementoQuadro(dadosQuadro) {
 
     excluirQuadro.classList.add("delete-board");
     excluirQuadro.type = "button";
-    excluirQuadro.title = "Excluir quadro";
-    excluirQuadro.textContent = "×";
-    excluirQuadro.addEventListener("click", () => {
-        void excluirQuadroPersistido(dadosQuadro);
-    });
-
-    titulo.addEventListener("change", () => {
-        const novoNome = titulo.value.trim() || "Novo quadro";
-        titulo.value = dadosQuadro.nome;
-
-        if (novoNome !== dadosQuadro.nome) {
-            void renomearQuadro(dadosQuadro, novoNome);
-        }
-    });
-
-    cartao.append(titulo, listaItens, adicionarItem, excluirQuadro);
+    if (colunaRevisarAtual) {
+        excluirQuadro.title = "Remover coluna Revisar";
+        excluirQuadro.textContent = "×";
+        excluirQuadro.addEventListener("click", () => {
+            void removerColunaRevisar(dadosQuadro);
+        });
+        cartao.append(titulo, listaItens, adicionarItem, excluirQuadro);
+    } else {
+        excluirQuadro.remove();
+        cartao.append(titulo, listaItens, adicionarItem);
+    }
     return cartao;
 }
 
@@ -745,10 +844,33 @@ async function excluirItemDoQuadro(dadosQuadro, indice) {
 }
 
 async function excluirQuadroPersistido(dadosQuadro) {
+    if (
+        colunasFixas.some((coluna) => coluna.id === dadosQuadro.id) ||
+        dadosQuadro.id !== colunaRevisar.id
+    ) {
+        return;
+    }
+
+    await removerColunaRevisar(dadosQuadro);
+}
+
+async function removerColunaRevisar(dadosQuadro) {
     const usuario = usuarioAtual;
     const projeto = projetoAtual;
 
-    if (!usuario || !projeto) {
+    if (
+        !usuario ||
+        !projeto ||
+        dadosQuadro.id !== colunaRevisar.id
+    ) {
+        return;
+    }
+
+    const confirmou = window.confirm(
+        `Remover a coluna Revisar? Todas as ${dadosQuadro.itens.length} tarefa(s) dela serão excluídas.`
+    );
+
+    if (!confirmou) {
         return;
     }
 
@@ -765,50 +887,57 @@ async function excluirQuadroPersistido(dadosQuadro) {
             renderizarQuadros();
         }
     } catch (error) {
-        reportarErro("Não foi possível excluir o quadro. Tente novamente.", error);
+        reportarErro("Não foi possível remover a coluna Revisar. Tente novamente.", error);
     }
 }
 
-async function criarQuadro(nome) {
+async function adicionarColunaRevisar() {
     const usuario = usuarioAtual;
     const projeto = projetoAtual;
 
     if (!usuario || !projeto) {
-        reportarErro("Selecione um projeto antes de criar um quadro.");
+        reportarErro("Selecione um projeto antes de adicionar Revisar.");
         return;
     }
 
-    const ordem = quadros.reduce(
-        (maiorOrdem, quadro) => Math.max(maiorOrdem, quadro.ordem),
-        -1
-    ) + 1;
     const dados = {
-        nome,
-        ordem,
-        cor: coresQuadros[ordem % coresQuadros.length],
+        nome: colunaRevisar.nome,
+        ordem: colunaRevisar.ordem,
+        cor: colunaRevisar.cor,
         itens: []
     };
 
     try {
-        const referencia = await addDoc(quadrosRef(usuario.uid, projeto.id), dados);
+        await setDoc(
+            doc(
+                db,
+                "users",
+                usuario.uid,
+                "projects",
+                projeto.id,
+                "boards",
+                colunaRevisar.id
+            ),
+            dados
+        );
 
         if (
             usuarioAtual?.uid === usuario.uid &&
             projetoAtual?.id === projeto.id
         ) {
-            quadros.push({ id: referencia.id, ...dados });
+            quadros.push({ id: colunaRevisar.id, ...dados });
             quadros.sort((primeiro, segundo) => primeiro.ordem - segundo.ordem);
             renderizarQuadros();
 
             const cartao = Array.from(
                 boardContainer.querySelectorAll(".board-card")
-            ).find((elemento) => elemento.dataset.boardId === referencia.id);
+            ).find((elemento) => elemento.dataset.boardId === colunaRevisar.id);
             const titulo = cartao?.querySelector(".board-card-title");
             titulo?.focus();
             titulo?.select();
         }
     } catch (error) {
-        reportarErro("Não foi possível criar o quadro. Tente novamente.", error);
+        reportarErro("Não foi possível adicionar a coluna Revisar. Tente novamente.", error);
     }
 }
 
@@ -952,13 +1081,9 @@ if (criarNovoProjeto) {
 }
 
 addProject.addEventListener("click", () => {
-    const nome = prompt("Nome do novo quadro:");
-
-    if (!nome || nome.trim() === "") {
-        return;
+    if (!quadros.some((quadro) => quadro.id === colunaRevisar.id)) {
+        void adicionarColunaRevisar();
     }
-
-    criarQuadro(nome.trim());
 });
 
 projectName.addEventListener("change", () => {
