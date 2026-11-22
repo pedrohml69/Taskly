@@ -4,9 +4,9 @@
 
 nav {
     width: 100%;
-    height: 100px;
+    height: 70px;
 
-    padding: 30px 40px;
+    padding: 40px 40px 40px 40px;
 
     display: flex;
     align-items: center;
@@ -74,6 +74,7 @@ nav::after {
 
     font-size: 18px;
     font-weight: 600;
+    transition: color 0.2s ease;
 }
 
 
@@ -84,13 +85,11 @@ nav::after {
 
     position: absolute;
 
-    width: 200px;
+    width: 190px;
     height: 60px;
 
-    top: -45px;
-    left: 50%;
+    top: -27px;
 
-    transform: translateX(-50%);
 
     background-color: var(--tab-active);
 
@@ -99,10 +98,21 @@ nav::after {
     opacity: 0;
 
     z-index: -1;
+    transition: opacity 0.2s ease;
 }
 
 .links a.active::before {
     opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+
+    .menu-button:hover,
+    .menu-button:focus-visible {
+        background-color: var(--yellow);
+        color: var(--dark);
+    }
+
 }
 
 
@@ -147,18 +157,24 @@ nav::after {
 .menu-button {
     display: none;
 
+    position: relative;
+
     width: 42px;
     height: 42px;
 
+    border: none;
     border-radius: 10px;
 
-    background-color: var(--dark);
-
-    color: var(--light);
+    background-color: var(--action-bg);
+    color: var(--action-text);
 
     font-size: 22px;
 
     cursor: pointer;
+
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
 }
 
 
@@ -373,6 +389,18 @@ nav::after {
     color: var(--text);
 }
 
+.logout-button {
+    width: fit-content;
+    margin-top: 8px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 12px;
+    background-color: var(--blue);
+    color: var(--light);
+    font-weight: 600;
+    cursor: pointer;
+}
+
 
 /* =========================================================
    CONFIGURAÇÕES
@@ -393,19 +421,6 @@ nav::after {
     border-bottom: 1px solid var(--border);
 }
 
-.logout-button{
-    padding: 10px 20px;
-    background-color: var(--red);
-    color: var(--light);
-    border: none;
-    cursor: pointer;
-    border-radius: 15px;   
-    width: 200px;  
-}
-
-.logout-button:hover {
-    background-color: #9a5454;
-}
 
 /* =========================================================
    SWITCH
@@ -479,7 +494,7 @@ nav::after {
     }
 
     .links {
-        gap: 50px;
+        gap: 60px;
     }
 
 }
@@ -489,28 +504,50 @@ nav::after {
 
     nav {
         height: 80px;
-
         padding: 20px;
     }
 
     nav::after {
         left: 15px;
-
         width: calc(100% - 30px);
     }
 
     .logo-links {
-        width: 100%;
-
-        justify-content: space-between;
+        width: auto;
+        flex: 1;
+        justify-content: flex-start;
+        gap: 15px;
     }
-
+    
     .logo-links h1 {
         font-size: 32px;
     }
 
     .menu-button {
         display: block;
+    }
+
+    .menu-button.menu-open {
+        background-color: var(--action-bg);
+        color: var(--action-text);
+    }
+
+    .menu-button.menu-open::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        width: 24px;
+        height: 40px;
+        transform: translateX(-50%);
+        border-radius: 0 0 6px 6px;
+        background-color: var(--action-bg);
+        z-index: 101;
+    }
+
+    .account {
+        margin-right: 0;
+        margin-left: 15px;
     }
 
 
@@ -532,13 +569,24 @@ nav::after {
 
         gap: 25px;
 
-        background-color: var(--surface);
+        background-color: var(--action-bg);
+        color: var(--action-text);
 
         z-index: 100;
 
         border-bottom: 3px solid var(--blue);
     }
 
+    .links a.active {
+        background-color: var(--tab-active);
+        padding: 0px 15px 0px 15px;
+        border-radius: 25px;
+        color: var(--dark);
+    }
+
+    .links a:not(.active) {
+        color: var(--action-text);
+    }
 
     /* Menu aberto */
 
@@ -564,16 +612,16 @@ nav::after {
     ===================================================== */
 
     .modal {
-        height: 90vh;
-
-        max-height: 600px;
+        height: min(90vh, 600px);
+        max-height: calc(100vh - 20px);
 
         flex-direction: column;
     }
 
-    .side-bar {
+    .mod-side-bar {
         width: 100%;
         height: 105px;
+        flex: 0 0 105px;
 
         padding: 45px 25px 0;
 
@@ -584,7 +632,7 @@ nav::after {
         overflow: hidden;
     }
 
-    .side-bar::after {
+    .mod-side-bar::after {
         top: auto;
         right: auto;
 
@@ -596,8 +644,8 @@ nav::after {
         height: 4px;
     }
 
-    .side-bar a::before {
-        width: 100%;
+    .mod-side-bar a::before {
+        width: calc(100% + 30px);
         height: 45px;
 
         top: -10px;
@@ -615,13 +663,13 @@ nav::after {
 
 @media (max-width: 400px) {
 
-    .side-bar {
+    .mod-side-bar {
         gap: 25px;
 
         padding-left: 20px;
     }
 
-    .side-bar a {
+    .mod-side-bar a {
         font-size: 16px;
     }
 

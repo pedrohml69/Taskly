@@ -2,35 +2,19 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{uid}/profile/main {
-      function isOwner() {
-        return request.auth != null && request.auth.uid == uid;
-      }
-
-      function isVerifiedOwner() {
-        return isOwner() && request.auth.token.email_verified == true;
-      }
-
-      function hasValidProfileFields(data) {
-        return request.auth != null
-          && data.name is string
-          && data.email == request.auth.token.email
-          && !('password' in data);
-      }
-
-      allow read: if isVerifiedOwner();
-      allow create: if isOwner()
-        && hasValidProfileFields(request.resource.data);
-      allow update: if isVerifiedOwner()
-        && hasValidProfileFields(request.resource.data);
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.name is string
+        && request.resource.data.email == request.auth.token.email
+        && !('password' in request.resource.data);
 
       allow delete: if false;
     }
 
     match /users/{uid}/tasks/{taskId} {
       function isOwner() {
-        return request.auth != null
-          && request.auth.uid == uid
-          && request.auth.token.email_verified == true;
+        return request.auth != null && request.auth.uid == uid;
       }
 
       function hasValidTaskFields(data) {
@@ -55,26 +39,16 @@ service cloud.firestore {
 
     match /users/{uid}/projects/{projectId} {
       function isOwner() {
-        return request.auth != null
-          && request.auth.uid == uid
-          && request.auth.token.email_verified == true;
-      }
-
-      function hasValidRoutineField(data) {
-        return data is map
-          && data.keys().hasOnly(['horario'])
-          && data.horario is string
-          && data.horario.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$');
+        return request.auth != null && request.auth.uid == uid;
       }
 
       function hasValidProjectFields(data) {
-        return (data.keys().hasOnly(['nome', 'descricao', 'ordem'])
-          || data.keys().hasOnly(['nome', 'descricao', 'ordem', 'rotina']))
+        return data.keys().hasAll(['nome', 'descricao', 'ordem'])
+          && data.keys().hasOnly(['nome', 'descricao', 'ordem'])
           && data.nome is string
           && data.nome.size() > 0
           && data.descricao is string
-          && data.ordem is number
-          && (!('rotina' in data) || hasValidRoutineField(data.rotina));
+          && data.ordem is number;
       }
 
       allow read: if isOwner();
@@ -86,7 +60,6 @@ service cloud.firestore {
         function isOwnerWithProject() {
           return request.auth != null
             && request.auth.uid == uid
-            && request.auth.token.email_verified == true
             && exists(
               /databases/$(database)/documents/users/$(uid)/projects/$(projectId)
             );
