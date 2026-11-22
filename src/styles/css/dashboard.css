@@ -183,6 +183,13 @@ body.dark-mode .week-controls button {
     font-size: 14px;
 }
 
+.routine-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
 .add-task-button {
     min-height: 50px;
     padding: 0 25px;
@@ -193,7 +200,18 @@ body.dark-mode .week-controls button {
     cursor: pointer;
 }
 
+.add-task-button.secondary {
+    background-color: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
 .add-task-button:hover {
+    background-color: var(--yellow);
+    color: var(--dark);
+}
+
+.add-task-button.secondary:hover {
     background-color: var(--yellow);
     color: var(--dark);
 }
@@ -364,6 +382,71 @@ body.dark-mode .week-controls button {
     overflow-wrap: anywhere;
 }
 
+.calendar-project {
+    width: 100%;
+    position: relative;
+    padding: 7px 26px 7px 7px;
+    border-radius: 9px;
+    background-color: var(--yellow);
+    color: var(--dark);
+    font-size: 11px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-project-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.calendar-project-header strong {
+    display: block;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.calendar-project-items {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    color: rgba(17, 17, 17, 0.74);
+}
+
+.calendar-project-items span {
+    display: block;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.calendar-project-details > summary {
+    margin-top: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.calendar-project-board {
+    padding-top: 4px;
+    border-top: 1px solid rgba(17, 17, 17, 0.16);
+}
+
+.calendar-project-board strong {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.calendar-project-board ul {
+    margin: 3px 0 0;
+    padding-left: 16px;
+}
+
+.calendar-project-board li {
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
 .calendar-task-delete {
     width: 20px;
     height: 20px;
@@ -384,6 +467,19 @@ body.dark-mode .week-controls button {
     background-color: var(--yellow);
 }
 
+.calendar-project .calendar-task-delete:hover {
+    background-color: rgba(17, 17, 17, 0.08);
+}
+
+#projectAssociationSelect {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background-color: var(--surface);
+    color: var(--text);
+}
 
 /* =========================
    FILTROS

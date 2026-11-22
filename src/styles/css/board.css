@@ -19,24 +19,6 @@
     font-weight: 600;
 }
 
-.links a::before {
-    content: "";
-    position: absolute;
-    width: 200px;
-    height: 60px;
-    top: -45px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--tab-active);
-    border-radius: 0 0 70px 70px;
-    opacity: 0;
-    z-index: -1;
-}
-
-.links a.active::before {
-    opacity: 1;
-}
-
 .account {
     display: flex;
     align-items: center;
@@ -132,9 +114,10 @@ main {
 
 .add-card span {
     color: var(--text);
-    font-size: 65px;
-    font-weight: 300;
-    line-height: 1;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
 }
 
 .add-card:hover {

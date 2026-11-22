@@ -23,7 +23,7 @@
             href="../styles/css/dashboard.css"
         >
 
-    <title>Taskly - Dashboard</title>
+    <title>Taskly | Dashboard</title>
 </head>
 
 <body>
@@ -126,13 +126,23 @@
                         </p>
                     </div>
 
-                    <button
-                        class="add-task-button"
-                        id="addTaskButton"
-                        type="button"
-                    >
-                        + Adicionar tarefa
-                    </button>
+                    <div class="routine-actions">
+                        <button
+                            class="add-task-button"
+                            id="addTaskButton"
+                            type="button"
+                        >
+                            + Adicionar tarefa
+                        </button>
+
+                        <button
+                            class="add-task-button secondary"
+                            id="associateProjectButton"
+                            type="button"
+                        >
+                            + Associar projeto
+                        </button>
+                    </div>
 
                 </div>
 
@@ -473,6 +483,52 @@
                 id="saveTask"
             >
                 Adicionar tarefa
+            </button>
+
+        </div>
+
+    </div>
+
+    <div
+        class="modal-overlay"
+        id="projectAssociationModal"
+    >
+
+        <div class="task-modal">
+
+            <button
+                class="fechar-modal"
+                id="closeProjectAssociationModal"
+            >
+                &times;
+            </button>
+
+            <h2>Associar projeto à rotina</h2>
+
+            <label>
+                Projeto
+            </label>
+
+            <select id="projectAssociationSelect">
+                <option value="">Selecione um projeto</option>
+            </select>
+
+            <label>
+                Horário
+            </label>
+
+            <input
+                type="time"
+                id="projectAssociationTime"
+                value="08:00"
+            >
+
+            <button
+                type="button"
+                class="save-task"
+                id="saveProjectAssociation"
+            >
+                Salvar associação
             </button>
 
         </div>
