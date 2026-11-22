@@ -1,5 +1,6 @@
 import {
     createUserWithEmailAndPassword,
+    sendEmailVerification,
     updateProfile
 } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 
@@ -129,12 +130,22 @@ form.addEventListener("submit", async (event) => {
         });
 
 
-        // =========================
-        // REDIRECIONAMENTO
-        // =========================
+        let deliveryFailed = false;
+        let deliveryErrorCode = "";
 
-        window.location.href =
-            "dashboard.html";
+        try {
+            await sendEmailVerification(user, {
+                url: new URL("./dashboard.html", window.location.href).href
+            });
+        } catch (error) {
+            deliveryFailed = true;
+            deliveryErrorCode = error.code || "unknown";
+            console.error("Não foi possível enviar o e-mail de verificação:", error);
+        }
+
+        window.location.href = deliveryFailed
+            ? `verify-email.html?delivery=failed&reason=${encodeURIComponent(deliveryErrorCode)}`
+            : "verify-email.html";
 
 
     } catch (error) {
@@ -187,10 +198,50 @@ form.addEventListener("submit", async (event) => {
                 break;
 
 
+            case "auth/operation-not-allowed":
+
+                alert(
+                    "O cadastro por e-mail e senha está desativado no Firebase Authentication."
+                );
+
+                break;
+
+
+            case "auth/unauthorized-domain":
+
+                alert(
+                    "Este domínio não está autorizado nas configurações do Firebase Authentication."
+                );
+
+                break;
+
+
+            case "auth/api-key-not-valid":
+
+            case "auth/invalid-api-key":
+
+            case "auth/project-not-found":
+
+                alert(
+                    "A configuração do projeto Firebase está inválida. Confira o projeto e a chave em firebase-config.js."
+                );
+
+                break;
+
+
+            case "permission-denied":
+
+                alert(
+                    "A conta do Firebase Authentication pode ter sido criada, mas o perfil foi recusado pelo Firestore. Confira as regras e tente entrar com o mesmo e-mail; não refaça o cadastro."
+                );
+
+                break;
+
+
             default:
 
                 alert(
-                    "Não foi possível realizar o cadastro."
+                    `Não foi possível concluir o cadastro (código: ${error.code || "desconhecido"}).`
                 );
 
                 break;
