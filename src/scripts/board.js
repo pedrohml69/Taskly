@@ -91,15 +91,17 @@ function mostrarPerfil() {
                 <div class="user"></div>
 
                 <div>
-                    <strong>${currentProfile.name || "Usuário"}</strong>
-                    <p>${currentProfile.email || ""}</p>
+                    <strong data-profile-name>${currentProfile.name || "Usuário"}</strong>
+                    <p data-profile-email>${currentProfile.email || ""}</p>
                 </div>
             </div>
 
-            <p>Nome: ${currentProfile.name || "Usuário"}</p>
-            <p>Email: ${currentProfile.email || ""}</p>
+            <p>Nome: <span data-profile-name>${currentProfile.name || "Usuário"}</span></p>
+            <p>Email: <span data-profile-email>${currentProfile.email || ""}</span></p>
         </div>
     `;
+
+    window.applyUserProfile?.(currentProfile);
 }
 
 function mostrarConfiguracoes() {
@@ -982,7 +984,7 @@ onAuthStateChanged(auth, (usuario) => {
     renderizarProjetos();
     renderizarQuadros();
 
-    if (usuario) {
+    if (usuario?.emailVerified) {
         void carregarProjetosDoUsuario(usuario, geracaoAtual);
     }
 });

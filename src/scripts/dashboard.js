@@ -6,6 +6,7 @@ import {
     addDoc,
     collection,
     deleteDoc,
+    deleteField,
     doc,
     getDocs,
     updateDoc
@@ -22,6 +23,7 @@ import {
 ========================= */
 
 const tarefas = [];
+const projetosRotina = [];
 const atualizacoesEmAndamento = new Set();
 let usuarioAtual = null;
 let geracaoDeCarregamento = 0;
@@ -81,6 +83,24 @@ const taskDate =
 
 const taskTime =
     document.getElementById("taskTime");
+
+const associateProjectButton =
+    document.getElementById("associateProjectButton");
+
+const projectAssociationModal =
+    document.getElementById("projectAssociationModal");
+
+const closeProjectAssociationModal =
+    document.getElementById("closeProjectAssociationModal");
+
+const saveProjectAssociation =
+    document.getElementById("saveProjectAssociation");
+
+const projectAssociationSelect =
+    document.getElementById("projectAssociationSelect");
+
+const projectAssociationTime =
+    document.getElementById("projectAssociationTime");
 
 
 /* =========================
@@ -192,6 +212,201 @@ function formatarDataCurta(data) {
     );
 }
 
+function obterHorasRotina() {
+    const horas = [];
+
+    for (let hora = 4; hora < 24; hora++) {
+        horas.push(hora);
+    }
+
+    for (let hora = 0; hora <= 3; hora++) {
+        horas.push(hora);
+    }
+
+    return horas;
+}
+
+async function carregarProjetosDaRotina(usuario) {
+    const snapshot = await getDocs(
+        collection(db, "users", usuario.uid, "projects")
+    );
+
+    const projetos = await Promise.all(
+        snapshot.docs.map(async (projetoDoc) => {
+            const dados = projetoDoc.data();
+            let quadros = [];
+            let erroQuadros = false;
+
+            try {
+                const quadrosSnapshot = await getDocs(
+                    collection(db, "users", usuario.uid, "projects", projetoDoc.id, "boards")
+                );
+
+                quadros = quadrosSnapshot.docs.map((quadroDoc) => ({
+                    id: quadroDoc.id,
+                    ...quadroDoc.data()
+                }));
+            } catch (error) {
+                erroQuadros = true;
+                console.error(`Não foi possível carregar os quadros do projeto ${projetoDoc.id}.`, error);
+            }
+
+            return {
+                id: projetoDoc.id,
+                nome: dados.nome,
+                descricao: dados.descricao || "",
+                rotina: dados.rotina || null,
+                quadros,
+                erroQuadros
+            };
+        })
+    );
+
+    return projetos;
+}
+
+function atualizarListaProjetosDisponiveis() {
+    if (!usuarioAtual) {
+        projectAssociationSelect.innerHTML = '<option value="">Selecione um projeto</option>';
+        return;
+    }
+
+    const options = ['<option value="">Selecione um projeto</option>'];
+
+    projetosRotina.forEach((projeto) => {
+        options.push(`<option value="${projeto.id}">${projeto.nome}</option>`);
+    });
+
+    projectAssociationSelect.innerHTML = options.join("");
+}
+
+function abrirModalAssociacaoProjeto() {
+    if (!usuarioAtual) {
+        alert("Sua sessão ainda não está pronta. Tente novamente.");
+        return;
+    }
+
+    atualizarListaProjetosDisponiveis();
+    projectAssociationModal.classList.add("ativo");
+}
+
+function fecharModalAssociacaoProjeto() {
+    projectAssociationModal.classList.remove("ativo");
+    projectAssociationSelect.value = "";
+    projectAssociationTime.value = "08:00";
+}
+
+async function removerProjetoDaRotina(projetoId) {
+    const usuario = usuarioAtual;
+
+    if (!usuario) {
+        return;
+    }
+
+    if (!usuario.emailVerified) {
+        return;
+    }
+
+    try {
+        await updateDoc(
+            doc(db, "users", usuario.uid, "projects", projetoId),
+            { rotina: deleteField() }
+        );
+
+        const projeto = projetosRotina.find((item) => item.id === projetoId);
+
+        if (projeto) {
+            delete projeto.rotina;
+        }
+
+        renderizarCalendario();
+    } catch (error) {
+        console.error("Não foi possível remover o projeto da rotina.", error);
+        alert("Não foi possível remover o projeto da rotina. Tente novamente.");
+    }
+}
+
+function renderizarProjetoRotinaNoHorario(cell, projetosDoHorario) {
+    projetosDoHorario.forEach((projeto) => {
+        const projetoElemento = document.createElement("div");
+        projetoElemento.classList.add("calendar-project");
+
+        const cabecalho = document.createElement("div");
+        cabecalho.classList.add("calendar-project-header");
+
+        const nomeElemento = document.createElement("strong");
+        nomeElemento.textContent = projeto.nome;
+
+        const botaoExcluir = document.createElement("button");
+        botaoExcluir.type = "button";
+        botaoExcluir.classList.add("calendar-task-delete");
+        botaoExcluir.textContent = "×";
+        botaoExcluir.title = `Remover ${projeto.nome} da rotina`;
+        botaoExcluir.setAttribute("aria-label", `Remover ${projeto.nome} da rotina`);
+
+        botaoExcluir.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            await removerProjetoDaRotina(projeto.id);
+        });
+
+        cabecalho.append(nomeElemento, botaoExcluir);
+
+        const detalhes = document.createElement("details");
+        detalhes.classList.add("calendar-project-details");
+
+        const resumo = document.createElement("summary");
+        resumo.textContent = projeto.erroQuadros
+            ? "Quadros indisponíveis"
+            : `Quadros e itens (${projeto.quadros.length})`;
+
+        const listaQuadros = document.createElement("div");
+        listaQuadros.classList.add("calendar-project-items");
+
+        if (projeto.quadros.length === 0) {
+            const mensagem = document.createElement("span");
+            mensagem.textContent = projeto.erroQuadros
+                ? "Não foi possível carregar os quadros deste projeto."
+                : "Sem quadros no momento";
+            listaQuadros.appendChild(mensagem);
+        } else {
+            projeto.quadros.forEach((quadro) => {
+                const quadroElemento = document.createElement("section");
+                quadroElemento.classList.add("calendar-project-board");
+
+                const nomeQuadro = document.createElement("strong");
+                nomeQuadro.textContent = quadro.nome || "Quadro";
+                quadroElemento.appendChild(nomeQuadro);
+
+                const itens = Array.isArray(quadro.itens) ? quadro.itens : [];
+
+                if (itens.length === 0) {
+                    const mensagem = document.createElement("span");
+                    mensagem.textContent = "Sem itens neste quadro";
+                    quadroElemento.appendChild(mensagem);
+                } else {
+                    const lista = document.createElement("ul");
+
+                    itens.forEach((texto) => {
+                        const item = document.createElement("li");
+                        item.textContent = texto;
+                        lista.appendChild(item);
+                    });
+
+                    quadroElemento.appendChild(lista);
+                }
+
+                listaQuadros.appendChild(quadroElemento);
+            });
+        }
+
+        detalhes.addEventListener("click", (event) => event.stopPropagation());
+        detalhes.addEventListener("dblclick", (event) => event.stopPropagation());
+        detalhes.append(resumo, listaQuadros);
+        projetoElemento.append(cabecalho, detalhes);
+        cell.appendChild(projetoElemento);
+    });
+}
+
 
 /* =========================
    CALENDÁRIO
@@ -295,11 +510,9 @@ function renderizarCalendario() {
 
     /* HORÁRIOS */
 
-    for (
-        let hora = 4;
-        hora <= 23;
-        hora++
-    ) {
+    const horasRotina = obterHorasRotina();
+
+    horasRotina.forEach((hora) => {
 
         const row =
             document.createElement("div");
@@ -316,8 +529,10 @@ function renderizarCalendario() {
             "calendar-time"
         );
 
-        time.textContent =
+        const horaFormatada =
             `${String(hora).padStart(2, "0")}:00`;
+
+        time.textContent = horaFormatada;
 
 
         row.appendChild(time);
@@ -342,12 +557,11 @@ function renderizarCalendario() {
 
 
             const data =
-                formatarData(dia);
-
-
-            const horaFormatada =
-                `${String(hora).padStart(2, "0")}:00`;
-
+                formatarData(
+                    hora < 4
+                        ? adicionarDias(dia, 1)
+                        : dia
+                );
 
             const tarefasDoHorario =
                 tarefas.filter(
@@ -359,6 +573,13 @@ function renderizarCalendario() {
                         primeira.horario.localeCompare(segunda.horario)
                 );
 
+            const projetosDoHorario =
+                projetosRotina.filter(
+                    (projeto) =>
+                        projeto.rotina &&
+                        projeto.rotina.horario &&
+                        projeto.rotina.horario.slice(0, 2) === horaFormatada.slice(0, 2)
+                );
 
             tarefasDoHorario.forEach(
                 (tarefa) => {
@@ -510,6 +731,7 @@ function renderizarCalendario() {
                 }
             );
 
+            renderizarProjetoRotinaNoHorario(cell, projetosDoHorario);
 
             cell.addEventListener(
                 "dblclick",
@@ -533,7 +755,7 @@ function renderizarCalendario() {
 
         calendarBody.appendChild(row);
 
-    }
+    });
 
     alinharCabecalhoCalendario();
 }
@@ -621,6 +843,75 @@ nextWeek.addEventListener(
 
         renderizarCalendario();
 
+    }
+);
+
+associateProjectButton.addEventListener(
+    "click",
+    () => {
+        abrirModalAssociacaoProjeto();
+    }
+);
+
+closeProjectAssociationModal.addEventListener(
+    "click",
+    () => {
+        fecharModalAssociacaoProjeto();
+    }
+);
+
+projectAssociationModal.addEventListener(
+    "click",
+    (event) => {
+        if (event.target === projectAssociationModal) {
+            fecharModalAssociacaoProjeto();
+        }
+    }
+);
+
+saveProjectAssociation.addEventListener(
+    "click",
+    async () => {
+        const usuario = usuarioAtual;
+
+        if (!usuario) {
+            alert("Sua sessão ainda não está pronta. Tente novamente.");
+            return;
+        }
+
+        const projetoId = projectAssociationSelect.value;
+        const horario = projectAssociationTime.value;
+
+        if (!projetoId || !horario) {
+            alert("Selecione um projeto e defina um horário antes de salvar.");
+            return;
+        }
+
+        try {
+            await updateDoc(
+                doc(db, "users", usuario.uid, "projects", projetoId),
+                { rotina: { horario } }
+            );
+
+            const projetoExistente = projetosRotina.find((projeto) => projeto.id === projetoId);
+
+            if (projetoExistente) {
+                projetoExistente.rotina = { horario };
+            } else {
+                projetosRotina.push({
+                    id: projetoId,
+                    nome: projectAssociationSelect.options[projectAssociationSelect.selectedIndex]?.text || "Projeto",
+                    rotina: { horario },
+                    quadros: []
+                });
+            }
+
+            renderizarCalendario();
+            fecharModalAssociacaoProjeto();
+        } catch (error) {
+            console.error("Não foi possível salvar a associação do projeto.", error);
+            alert("Não foi possível salvar a associação do projeto. Tente novamente.");
+        }
     }
 );
 
@@ -1193,7 +1484,9 @@ function atualizarGraficoCarga() {
     const dados = [];
 
     if (periodoCarga === "day") {
-        for (let hora = 4; hora <= 23; hora++) {
+        const horas = obterHorasRotina();
+
+        horas.forEach((hora) => {
             const horaFormatada =
                 String(hora).padStart(2, "0");
 
@@ -1205,10 +1498,10 @@ function atualizarGraficoCarga() {
                 ).length;
 
             dados.push({
-                label: `${hora}h`,
+                label: `${horaFormatada}h`,
                 valor: quantidade
             });
-        }
+        });
     } else if (periodoCarga === "week") {
         for (let indice = 0; indice < 7; indice++) {
             const dia = adicionarDias(inicioSemana, indice);
@@ -1480,11 +1773,11 @@ function mostrarPerfil() {
 
                 <div>
 
-                    <strong>
+                    <strong data-profile-name>
                         ${currentProfile.name || "Usuário"}
                     </strong>
 
-                    <p>
+                    <p data-profile-email>
                         ${currentProfile.email || ""}
                     </p>
 
@@ -1493,15 +1786,17 @@ function mostrarPerfil() {
             </div>
 
             <p>
-                Nome: ${currentProfile.name || "Usuário"}
+                Nome: <span data-profile-name>${currentProfile.name || "Usuário"}</span>
             </p>
 
             <p>
-                Email: ${currentProfile.email || ""}
+                Email: <span data-profile-email>${currentProfile.email || ""}</span>
             </p>
 
         </div>
     `;
+
+    window.applyUserProfile?.(currentProfile);
 
 }
 
@@ -1691,6 +1986,7 @@ onAuthStateChanged(auth, async (usuario) => {
     const geracaoAtual = ++geracaoDeCarregamento;
     usuarioAtual = usuario;
     tarefas.splice(0, tarefas.length);
+    projetosRotina.splice(0, projetosRotina.length);
 
     renderizarCalendario();
     atualizarGraficos();
@@ -1700,9 +1996,10 @@ onAuthStateChanged(auth, async (usuario) => {
     }
 
     try {
-        const snapshot = await getDocs(
-            collection(db, "users", usuario.uid, "tasks")
-        );
+        const [snapshotTarefas, projetosAutenticados] = await Promise.all([
+            getDocs(collection(db, "users", usuario.uid, "tasks")),
+            carregarProjetosDaRotina(usuario)
+        ]);
 
         if (
             geracaoAtual !== geracaoDeCarregamento ||
@@ -1711,7 +2008,7 @@ onAuthStateChanged(auth, async (usuario) => {
             return;
         }
 
-        snapshot.forEach((tarefaDoc) => {
+        snapshotTarefas.forEach((tarefaDoc) => {
             const dados = tarefaDoc.data();
 
             tarefas.push({
@@ -1723,6 +2020,8 @@ onAuthStateChanged(auth, async (usuario) => {
             });
         });
 
+        projetosRotina.push(...projetosAutenticados);
+        atualizarListaProjetosDisponiveis();
         renderizarCalendario();
         atualizarGraficos();
     } catch (error) {
