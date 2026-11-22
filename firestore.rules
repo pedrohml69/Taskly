@@ -102,10 +102,47 @@ service cloud.firestore {
             && data.itens is list;
         }
 
+        function isFixedBoard() {
+          return boardId in [
+            'kanban-fazer',
+            'kanban-fazendo',
+            'kanban-feito'
+          ];
+        }
+
+        function isFixedBoardData(data) {
+          return (boardId == 'kanban-fazer'
+              && data.nome == 'To Do'
+              && data.ordem == 0
+              && data.cor == 'quadro-azul')
+            || (boardId == 'kanban-fazendo'
+              && data.nome == 'Doing'
+              && data.ordem == 1
+              && data.cor == 'quadro-amarelo')
+            || (boardId == 'kanban-feito'
+              && data.nome == 'Done'
+              && data.ordem == 2
+              && data.cor == 'quadro-vermelho');
+        }
+
+        function isReviewBoardData(data) {
+          return boardId == 'kanban-revisar'
+            && data.nome == 'Review'
+            && data.ordem == 3
+            && data.cor == 'quadro-amarelo';
+        }
+
         allow read: if isOwnerWithProject();
-        allow create, update: if isOwnerWithProject()
-          && hasValidBoardFields(request.resource.data);
-        allow delete: if isOwnerWithProject();
+        allow create: if isOwnerWithProject()
+          && hasValidBoardFields(request.resource.data)
+          && (isFixedBoardData(request.resource.data)
+            || isReviewBoardData(request.resource.data));
+        allow update: if isOwnerWithProject()
+          && hasValidBoardFields(request.resource.data)
+          && (isFixedBoard() || boardId == 'kanban-revisar')
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['itens']);
+        allow delete: if isOwnerWithProject()
+          && (boardId == 'kanban-revisar');
       }
     }
 
